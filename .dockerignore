@@ -1,0 +1,9 @@
+.git
+.gitignore
+web/node_modules
+**/__pycache__
+**/*.pyc
+logs
+config/db
+config/cache
+
