@@ -24,3 +24,5 @@ config/cache/
 .vscode/
 .idea/
 
+# Prompts and internal docs
+.internal/
