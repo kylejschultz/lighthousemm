@@ -1,0 +1,48 @@
+name: lhmm-dev
+
+services:
+  server:
+    container_name: lhmm-backend
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    working_dir: /lhmm/app/backend
+    command: uvicorn lhmm.main:app --reload --host 0.0.0.0 --port 8080
+    environment:
+      LHMM_ROOT: /lhmm
+      LHMM_APP_DIR: /lhmm/app
+      LHMM_BACKEND_DIR: /lhmm/app/backend
+      LHMM_FRONTEND_DIR: /lhmm/app/frontend
+      LHMM_CONFIG_DIR: /lhmm/config
+      LHMM_LOG_DIR: /lhmm/logs
+      LHMM_MEDIA_ROOT: /lhmm/media
+      LHMM_DB_URL: sqlite:////lhmm/config/db/lhmm.sqlite3
+    volumes:
+      - ./server:/lhmm/app/backend
+      - ./web:/lhmm/app/frontend
+      - /Volumes/kdev/lhmm-demo/config:/lhmm/config
+      - /Volumes/kdev/lhmm-demo/logs:/lhmm/logs
+      - /Volumes/kdev/lhmm-demo/media:/lhmm/media
+    ports:
+      - "8080:8080"
+    networks: [lhmmnet]
+
+  web:
+    container_name: lhmm-frontend
+    image: node:20
+    user: "1000:1000"
+    working_dir: /lhmm/app/frontend
+    command: sh -lc 'if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm run dev -- --host 0.0.0.0 --port 5173 --strictPort'
+    environment:
+      CHOKIDAR_USEPOLLING: "1"
+    volumes:
+      - ./web:/lhmm/app/frontend
+    ports:
+      - "5173:5173"
+    depends_on: [server]
+    networks: [lhmmnet]
+  
+networks:
+  lhmmnet:
+    driver: bridge
+
