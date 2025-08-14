@@ -1,0 +1,41 @@
+name: "Feature request"
+description: "Quick feature idea for Lighthouse"
+title: "feat: "
+labels: ["feature-request"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for helping improve Lighthouse! Keep it simple."
+
+  - type: textarea
+    id: what
+    attributes:
+      placeholder: What do you want Lighthouse to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      placeholder: Why is this useful to you?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Nice to have
+        - Important
+        - Urgent
+    validations:
+      required: true
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Anything else? (optional)
+      placeholder: Links or screenshots (drag & drop works)
