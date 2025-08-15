@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+import json, os, sys
+# Ensure project root (/lhmm/app/backend) is importable when executing this file directly
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from lhmm.settings import settings
+print(json.dumps(settings.model_dump(), indent=2))
+
