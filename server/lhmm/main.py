@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from lhmm.settings import settings
 from lhmm.logging_config import setup_logging
+from lhmm.api.v1 import tmdb as tmdb_routes
 import os, time
 
 # make sure log dir exists
@@ -59,5 +60,6 @@ def db_pragma():
         fk = conn.exec_driver_sql("PRAGMA foreign_keys;").scalar()
     return {"journal_mode": jm, "foreign_keys": fk}
 
+api.include_router(tmdb_routes.router)
 app.include_router(api)
 
