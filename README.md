@@ -20,6 +20,28 @@ LighthouseMM is a modern media manager that utilizes Plex-like libraries to help
 ### Dev Links
 - **API**: http://localhost:8080/api/v1/healthz
 - **Web**: http://localhost:5173
+- **DB Pragma**: http://localhost:8080/api/v1/db/pragma
+- **DB Ping**: http://localhost:8080/api/v1/db/ping
+
+## Database & migrations
+- SQLite DB: `/lhmm/config/db/lhmm.sqlite3` (WAL enabled; foreign keys enforced per-connection)
+- Apply latest migrations (inside container):
+
+```bash
+docker compose -f docker-compose.dev.yml exec -T server bash -lc 'alembic upgrade head'
+```
+
+- Create a new migration and upgrade:
+
+```bash
+docker compose -f docker-compose.dev.yml exec -T server bash -lc 'alembic revision -m "schema change" --autogenerate && alembic upgrade head'
+```
+
+- Check runtime PRAGMAs via the app:
+
+```bash
+curl -s http://localhost:8080/api/v1/db/pragma
+```
 
 ## Create the React app
 ```
