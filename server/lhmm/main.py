@@ -37,5 +37,27 @@ api = APIRouter(prefix="/api/v1")
 def healthz():
     return {"ok": True, "time": int(time.time())}
 
+# DB health check
+from lhmm.db.session import SessionLocal
+from lhmm.db.session import engine
+from sqlalchemy import text
+
+@api.get("/db/ping")
+def db_ping():
+    # Open and close a session to ensure DB is reachable
+    with SessionLocal() as session:
+        session.execute(text("SELECT 1"))
+    return {"db": "ok"}
+
+
+# Report current SQLite PRAGMAs via the app's SQLAlchemy engine
+@api.get("/db/pragma")
+def db_pragma():
+    # Report current SQLite PRAGMAs via the app's SQLAlchemy engine
+    with engine.connect() as conn:
+        jm = conn.exec_driver_sql("PRAGMA journal_mode;").scalar()
+        fk = conn.exec_driver_sql("PRAGMA foreign_keys;").scalar()
+    return {"journal_mode": jm, "foreign_keys": fk}
+
 app.include_router(api)
 
