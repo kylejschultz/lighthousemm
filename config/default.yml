@@ -1,0 +1,32 @@
+logging:
+  file: /lhmm/logs/lhmm.log
+  max_bytes: 10000000
+  backups: 5
+  level: INFO
+  timezone: local
+
+db:
+  url: sqlite:////lhmm/config/db/lhmm.sqlite3
+
+paths:
+  media_root: /lhmm/media
+
+scheduler:
+  enabled: true
+
+tmdb:
+  api_key: ""   # set via env override later (LHMM__TMDB__API_KEY)
+
+sabnzbd:
+  url: ""
+  api_key: ""
+  category_default: ""
+
+indexers: []     # list of {name,url,api_key,capabilities:{}}
+
+auth:
+  basic:
+    enabled: false
+    username: ""
+    password: ""
+

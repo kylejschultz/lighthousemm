@@ -1,26 +1,19 @@
-import os
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from lhmm.settings import settings
+from lhmm.logging_config import setup_logging
+import os, time
 
-# Configure logging BEFORE app instantiation
-try:
-    from .logging_config import setup_logging
-except ImportError:  # pragma: no cover
-    from lhmm.logging_config import setup_logging  # type: ignore
+# make sure log dir exists
+os.makedirs(os.path.dirname(settings.logging.file), exist_ok=True)
 
-LOG_DIR = os.environ.get("LHMM_LOG_DIR", "/lhmm/logs")
-DEFAULT_LOG_FILE = os.path.join(LOG_DIR, "lhmm.log")
-LOG_FILE = os.environ.get("LHMM_LOG_FILE", DEFAULT_LOG_FILE)
-LOG_LEVEL = os.environ.get("LHMM_LOG_LEVEL", "INFO")
-LOG_TZ = os.environ.get("LHMM_LOG_TZ", "local")
-LOG_MAX_BYTES = int(os.environ.get("LHMM_LOG_MAX_BYTES", "10000000"))
-LOG_BACKUPS = int(os.environ.get("LHMM_LOG_BACKUPS", "5"))
+# init logging from settings
 setup_logging(
-    log_file=LOG_FILE,
-    max_bytes=LOG_MAX_BYTES,
-    backups=LOG_BACKUPS,
-    level=LOG_LEVEL,
-    timezone=LOG_TZ,
+    log_file=settings.logging.file,
+    max_bytes=settings.logging.max_bytes,
+    backups=settings.logging.backups,
+    level=settings.logging.level,
+    timezone=settings.logging.timezone,
 )
 
 app = FastAPI(
@@ -42,7 +35,7 @@ api = APIRouter(prefix="/api/v1")
 
 @api.get("/healthz")
 def healthz():
-    return {"ok": True}
+    return {"ok": True, "time": int(time.time())}
 
 app.include_router(api)
 
