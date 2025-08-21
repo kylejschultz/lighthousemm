@@ -30,3 +30,6 @@ auth:
     username: ""
     password: ""
 
+cors:
+  allowed_origins:
+    - http://localhost:5173

@@ -26,3 +26,11 @@ config/cache/
 
 # Prompts and internal docs
 .internal/
+
+# local env
+.env
+# cloudflare tunnel cache
+.cloudflared/
+# old caddy artifacts (if any linger locally)
+caddy-root-ca.crt
+caddy-root-ca.crt.sha_and_pem

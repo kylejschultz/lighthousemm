@@ -24,9 +24,7 @@ services:
       - ./web:/lhmm/app/frontend
       - /Volumes/kdev/lhmm-demo/config:/lhmm/config
       - /Volumes/kdev/lhmm-demo/logs:/lhmm/logs
-      - /Volumes/kdev/lhmm-demo/media:/lhmm/media
-    ports:
-      - "8080:8080"
+      - /Volumes/media:/lhmm/media
     networks: [lhmmnet]
 
   web:
@@ -36,12 +34,22 @@ services:
     working_dir: /lhmm/app/frontend
     command: sh -lc 'if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm run dev -- --host 0.0.0.0 --port 5173 --strictPort'
     environment:
-      CHOKIDAR_USEPOLLING: "1"
+      - CHOKIDAR_USEPOLLING=1
+      - DEV_DOMAIN=${DEV_DOMAIN}
     volumes:
       - ./web:/lhmm/app/frontend
-    ports:
-      - "5173:5173"
     depends_on: [server]
+    networks: [lhmmnet]
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: lhmm-cloudflared
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - server
+      - web
     networks: [lhmmnet]
   
 networks:
