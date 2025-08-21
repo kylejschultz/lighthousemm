@@ -58,3 +58,31 @@ npm create vite@latest web -- --template react-ts && cd web && npm i
 - Logs: `/lhmm/logs`
 - Media root: `/lhmm/media`
 
+## Dev over Cloudflare Tunnel (no ports, real HTTPS)
+Use a Cloudflare Tunnel sidecar to expose the dev UI/API on your real domains without opening ports.
+
+**Setup**
+1. In Cloudflare → Zero Trust → Access → Tunnels → Create Tunnel. Copy the token.
+2. Add to `.env`:
+   ```
+   DEV_DOMAIN=lhmm.dev
+   API_DEV_DOMAIN=api.lhmm.dev
+   CLOUDFLARE_TUNNEL_TOKEN=...token...
+   LHMM__CORS__ALLOWED_ORIGINS='["https://lhmm.dev"]'
+   ```
+3. In the Tunnel Public Hostnames, add:
+   - `lhmm.dev` → HTTP → `web:5173`
+   - `api.lhmm.dev` → HTTP → `server:8080`
+4. Start:
+   ```
+   docker compose -f docker-compose.dev.yml up -d
+   ```
+5. Test:
+   - https://lhmm.dev
+   - https://api.lhmm.dev/api/v1/healthz
+   - https://api.lhmm.dev/api/v1/tmdb/search?q=dune
+
+Notes:
+- Vite HMR uses WSS via `DEV_DOMAIN` (no port URLs).
+- Backend CORS is controlled via config/env (`LHMM__CORS__ALLOWED_ORIGINS`).
+

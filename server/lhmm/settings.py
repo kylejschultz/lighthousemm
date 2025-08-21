@@ -45,6 +45,9 @@ class BasicAuthCfg(BaseModel):
 class AuthCfg(BaseModel):
     basic: BasicAuthCfg = BasicAuthCfg()
 
+class CorsCfg(BaseModel):
+    allowed_origins: List[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+
 class Settings(BaseModel):
     logging: LoggingCfg = LoggingCfg()
     db: DBCfg = DBCfg()
@@ -54,6 +57,7 @@ class Settings(BaseModel):
     sabnzbd: SABCfg = SABCfg()
     indexers: List[IndexerCfg] = Field(default_factory=list)
     auth: AuthCfg = AuthCfg()
+    cors: CorsCfg = CorsCfg()
 
 def _deep_merge(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(a)
