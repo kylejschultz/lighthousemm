@@ -19,6 +19,7 @@ services:
       LHMM_MEDIA_ROOT: /lhmm/media
       LHMM_DB_URL: sqlite:////lhmm/config/db/lhmm.sqlite3
       LHMM__TMDB__API_KEY: ${TMDB_API_KEY}
+      LHMM__CORS__ALLOWED_ORIGINS: ${LHMM__CORS__ALLOWED_ORIGINS}
     volumes:
       - ./server:/lhmm/app/backend
       - ./web:/lhmm/app/frontend
