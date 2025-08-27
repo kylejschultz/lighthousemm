@@ -1,37 +1,49 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query
 from lhmm.settings import settings
-from lhmm.tmdb.client import TMDBClient, normalize_movie, normalize_tv
+import httpx
+import asyncio
+from typing import Literal, List, Dict, Any
 
 router = APIRouter(prefix="/tmdb", tags=["tmdb"])
 
+BASE = "https://api.themoviedb.org/3"
+
+async def _search(client: httpx.AsyncClient, path: str, key: str, q: str, page: int) -> List[Dict[str, Any]]:
+    r = await client.get(f"{BASE}{path}", params={"api_key": key, "query": q, "page": page})
+    r.raise_for_status()
+    data = r.json()
+    return data.get("results", [])
+
 @router.get("/search")
-async def search(q: str = Query(..., min_length=1)):
-    if not settings.tmdb.api_key:
-        raise HTTPException(status_code=400, detail="TMDB API key not configured")
-    client = TMDBClient(settings.tmdb.api_key)
+async def search(
+    q: str | None = Query(None, description="query string (alias: 'query')"),
+    query: str | None = Query(None, description="alias of 'q'"),
+    media_type: Literal["multi", "movie", "tv"] = Query("multi"),
+    page: int = Query(1, ge=1, le=100),
+):
+    qval = (q or query or "").strip()
+    if not qval:
+        return {"query": qval, "media_type": media_type, "results": []}
+    key = settings.tmdb.api_key
+    if not key:
+        return {"query": qval, "media_type": media_type, "results": []}
     try:
-        return await client.search(q)
-    finally:
-        await client.close()
-
-@router.get("/title/movie/{tmdb_id}")
-async def movie(tmdb_id: int):
-    if not settings.tmdb.api_key:
-        raise HTTPException(status_code=400, detail="TMDB API key not configured")
-    client = TMDBClient(settings.tmdb.api_key)
-    try:
-        d = await client.movie(tmdb_id)
-        return normalize_movie(d)
-    finally:
-        await client.close()
-
-@router.get("/title/tv/{tmdb_id}")
-async def tv(tmdb_id: int):
-    if not settings.tmdb.api_key:
-        raise HTTPException(status_code=400, detail="TMDB API key not configured")
-    client = TMDBClient(settings.tmdb.api_key)
-    try:
-        d = await client.tv(tmdb_id)
-        return normalize_tv(d)
-    finally:
-        await client.close()
+        async with httpx.AsyncClient(timeout=10) as client:
+            if media_type == "movie":
+                mov = await _search(client, "/search/movie", key, qval, page)
+                results = [{**it, "media_type": "movie"} for it in mov]
+            elif media_type == "tv":
+                tv = await _search(client, "/search/tv", key, qval, page)
+                results = [{**it, "media_type": "tv"} for it in tv]
+            else:
+                mov_task = _search(client, "/search/movie", key, qval, page)
+                tv_task = _search(client, "/search/tv", key, qval, page)
+                mov, tv = await asyncio.gather(mov_task, tv_task)
+                merged = (
+                    [{**it, "media_type": "movie"} for it in mov]
+                    + [{**it, "media_type": "tv"} for it in tv]
+                )
+                results = sorted(merged, key=lambda x: x.get("popularity", 0), reverse=True)
+        return {"query": qval, "media_type": media_type, "results": results}
+    except httpx.HTTPError:
+        return {"query": qval, "media_type": media_type, "results": []}
