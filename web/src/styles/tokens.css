@@ -1,0 +1,21 @@
+:root {
+  --bg: 220 14% 97%;
+  --card: 0 0% 100%;
+  --text: 222 47% 11%;
+  --subtle: 215 16% 47%;
+  --primary: 240 85% 60%;
+  --primary-fg: 0 0% 100%;
+  --border: 220 13% 91%;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+:root[data-theme="dark"] {
+  --bg: 222 47% 6%;
+  --card: 222 47% 12%;
+  --text: 210 40% 96%;
+  --subtle: 215 16% 65%;
+  --primary: 240 85% 66%;
+  --primary-fg: 0 0% 100%;
+  --border: 217 33% 22%;
+}
+
