@@ -65,22 +65,22 @@ Use a Cloudflare Tunnel sidecar to expose the dev UI/API on your real domains wi
 1. In Cloudflare → Zero Trust → Access → Tunnels → Create Tunnel. Copy the token.
 2. Add to `.env`:
    ```
-   DEV_DOMAIN=lhmm.dev
-   API_DEV_DOMAIN=api.lhmm.dev
+   DEV_DOMAIN=<dev-domain.tld>
+   API_DEV_DOMAIN=api.<dev-domain.tld>
    CLOUDFLARE_TUNNEL_TOKEN=...token...
-   LHMM__CORS__ALLOWED_ORIGINS='["https://lhmm.dev"]'
+   LHMM__CORS__ALLOWED_ORIGINS='["https://<dev-domain.tld>"]'
    ```
 3. In the Tunnel Public Hostnames, add:
-   - `lhmm.dev` → HTTP → `web:5173`
-   - `api.lhmm.dev` → HTTP → `server:8080`
+   - `<dev-domain.tld>` → HTTP → `web:5173`
+   - `api.<dev-domain.tld>` → HTTP → `server:8080`
 4. Start:
    ```
    docker compose -f docker-compose.dev.yml up -d
    ```
 5. Test:
-   - https://lhmm.dev
-   - https://api.lhmm.dev/api/v1/healthz
-   - https://api.lhmm.dev/api/v1/tmdb/search?q=dune
+   - https://<dev-domain.tld>
+   - https://api.<dev-domain.tld>/api/v1/healthz
+   - https://api.<dev-domain.tld>/api/v1/tmdb/search?q=dune
 
 Notes:
 - Vite HMR uses WSS via `DEV_DOMAIN` (no port URLs).
