@@ -18,6 +18,19 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
 )
 
+# Scheduler bootstrap
+try:
+    from lhmm.scheduler import scheduler  # type: ignore
+    @app.on_event("startup")
+    async def _start_scheduler():
+        try:
+            scheduler.start()
+        except Exception:
+            pass
+except Exception:
+    # Scheduler optional
+    pass
+
 # Initialize JSON logging immediately after app creation
 setup_json_logging(
     level=settings.logging.level,

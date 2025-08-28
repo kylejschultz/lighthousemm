@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, BackgroundTasks
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
@@ -106,3 +106,68 @@ def delete_library(library_id: int, db: Session = Depends(get_db)):
     if not li:
         return
     db.delete(li)
+
+# --- Media scan & items endpoints ---
+from lhmm.db.models import MediaFile, MediaItem, Series, LibraryScan
+from lhmm.services.scanner import scan_library
+import json as _json
+
+@router.post("/{library_id}/scan")
+def start_scan(library_id: int, bg: BackgroundTasks, db: Session = Depends(get_db)):
+    if not db.get(Library, library_id):
+        raise not_found()
+    bg.add_task(scan_library, library_id)
+    return {"queued": True}
+
+@router.get("/{library_id}/items")
+def list_items(library_id: int, limit: int = 50, offset: int = 0, db: Session = Depends(get_db)):
+    if not db.get(Library, library_id):
+        raise not_found()
+    stmt = (
+        select(MediaFile, MediaItem, Series)
+        .join(MediaItem, MediaFile.item_id == MediaItem.id)
+        .join(Library, MediaFile.library_id == Library.id)
+        .outerjoin(Series, MediaItem.series_id == Series.id)
+        .where(MediaFile.library_id == library_id)
+        .order_by(MediaFile.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows = db.execute(stmt).all()
+    items = []
+    for mf, mi, se in rows:
+        items.append({
+            "file_id": mf.id,
+            "path": mf.rel_path,
+            "size": mf.size,
+            "kind": mi.kind,
+            "title": mi.title,
+            "year": mi.year,
+            "series": se.name if se else None,
+            "season": mi.season,
+            "episode": mi.episode,
+        })
+    total = db.scalar(select(func.count()).select_from(MediaFile).where(MediaFile.library_id == library_id)) or 0
+    return {"total": total, "items": items}
+
+@router.get("/{library_id}/scans")
+def list_scans(library_id: int, limit: int = 10, db: Session = Depends(get_db)):
+    if not db.get(Library, library_id):
+        raise not_found()
+    stmt = (
+        select(LibraryScan)
+        .where(LibraryScan.library_id == library_id)
+        .order_by(LibraryScan.id.desc())
+        .limit(limit)
+    )
+    scans = [
+        {
+            "id": s.id,
+            "status": s.status,
+            "stats": (_json.loads(s.stats_json or "{}") if isinstance(s.stats_json, str) else s.stats_json) or {},
+            "started_at": s.started_at,
+            "finished_at": s.finished_at,
+        }
+        for s in db.execute(stmt).scalars().all()
+    ]
+    return {"items": scans}
