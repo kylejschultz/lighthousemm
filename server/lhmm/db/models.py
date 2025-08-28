@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import datetime, timezone
-from sqlalchemy import String, Integer, BigInteger, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import String, Integer, BigInteger, ForeignKey, UniqueConstraint, Index, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from lhmm.db.base import Base
 
@@ -103,3 +103,8 @@ class Job(Base):
     payload_json: Mapped[str] = mapped_column(String, nullable=False, default="{}")
     started_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     finished_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+
+class AppConfig(Base):
+    __tablename__ = "app_config"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    data: Mapped[dict] = mapped_column(JSON, default=dict)

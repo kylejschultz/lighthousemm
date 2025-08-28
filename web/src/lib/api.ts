@@ -19,6 +19,9 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   health: () => req<string>("healthz"),
   config: () => req<any>("system/config"),
+  system: {
+    updateConfig: (payload: any) => req<any>("system/config", { method: "PUT", body: JSON.stringify(payload) }),
+  },
   disks: { list: () => req<any>("disks") },
   libraries: {
     list: () => req<any>("libraries"),
