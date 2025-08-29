@@ -15,6 +15,11 @@ DEFAULTS = {
     "http://127.0.0.1:5173",
     "http://localhost:4173"
   ],
+  # SABnzbd
+  "sab_url": None,
+  "sab_api_key": None,
+  "sab_category_movies": "movies",
+  "sab_category_tv": "tv",
 }
 
 def _ensure_row(db: Session) -> AppConfig:
@@ -37,6 +42,9 @@ def _normalize_origins(val):
       seen.add(k); out.append(k)
   return out
 
+def _mask_secret(v): 
+  return "***" if v else None
+
 def load_config(db: Session) -> dict:
   row = _ensure_row(db)
   cfg = {**DEFAULTS, **(row.data or {})}
@@ -58,6 +66,10 @@ def save_partial(db: Session, patch: dict) -> dict:
   for k in ("tmdb_api_key","log_level","log_backups"):
     if k in patch and patch[k] is not None:
       merged[k] = patch[k]
+  # SAB settings
+  for k in ("sab_url","sab_api_key","sab_category_movies","sab_category_tv"):
+      if k in patch and patch[k] is not None:
+          merged[k] = patch[k]
   if "cors_allowed_origins" in patch and patch["cors_allowed_origins"] is not None:
     merged["cors_allowed_origins"] = _normalize_origins(patch["cors_allowed_origins"])
   row.data = merged

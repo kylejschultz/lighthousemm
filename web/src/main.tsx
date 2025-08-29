@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ConfigProvider, theme as antdTheme } from "antd";
-import App from "./App";
+import { ConfigProvider, theme as antdTheme, App as AntdApp } from "antd";
+import RootApp from "./App";
 import "antd/dist/reset.css";
 import "./index.css";
 
@@ -30,19 +30,19 @@ function AppWithTheme() {
       theme={{
         algorithm: dark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
-          // primary palette: AntD Geek Blue
           colorPrimary: "#1677ff",
-          // dark navy surface tones (works under both algorithms)
-          colorBgLayout: dark ? "#0e1624" : undefined,     // page background
-          colorBgContainer: dark ? "#141b2b" : undefined,  // cards/panels
+          colorBgLayout: dark ? "#0e1624" : undefined,
+          colorBgContainer: dark ? "#141b2b" : undefined,
           colorBorderSecondary: dark ? "#202836" : undefined,
           borderRadius: 12,
         },
       }}
     >
-      <QueryClientProvider client={qc}>
-        <App />
-      </QueryClientProvider>
+      <AntdApp>
+        <QueryClientProvider client={qc}>
+          <RootApp />
+        </QueryClientProvider>
+      </AntdApp>
     </ConfigProvider>
   );
 }

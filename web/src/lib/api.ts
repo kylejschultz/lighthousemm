@@ -22,6 +22,11 @@ export const api = {
   system: {
     updateConfig: (payload: any) => req<any>("system/config", { method: "PUT", body: JSON.stringify(payload) }),
   },
+  sab: {
+    test: () => req<any>("system/sab/test", { method: "POST" }),
+    queue: () => req<any>("system/sab/queue"),
+    history: (limit=50) => req<any>(`system/sab/history?limit=${limit}`),
+  },
   disks: { list: () => req<any>("disks") },
   libraries: {
     list: () => req<any>("libraries"),
