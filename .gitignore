@@ -34,3 +34,4 @@ config/cache/
 # old caddy artifacts (if any linger locally)
 caddy-root-ca.crt
 caddy-root-ca.crt.sha_and_pem
+web/.env.development

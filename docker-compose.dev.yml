@@ -23,8 +23,8 @@ services:
     volumes:
       - ./server:/lhmm/app/backend
       - ./web:/lhmm/app/frontend
-      - /Volumes/kdev/lhmm-demo/config:/lhmm/config
-      - /Volumes/kdev/lhmm-demo/logs:/lhmm/logs
+      - /Volumes/QuickStick/Development/lhmm-demo/config:/lhmm/config
+      - /Volumes/QuickStick/Development/lhmm-demo/logs:/lhmm/logs
       - /Volumes/media:/lhmm/media
     networks: [lhmmnet]
 
